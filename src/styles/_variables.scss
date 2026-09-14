@@ -1,0 +1,6 @@
+// Punto de entrada unico de los tokens. Este parcial NO se inyecta desde Vite,
+// asi que cada fichero de estilos lo trae con: @use 'variables' as v;
+
+@forward 'colors';
+@forward 'breakpoints';
+@forward 'medidas';

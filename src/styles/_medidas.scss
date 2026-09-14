@@ -1,0 +1,18 @@
+// Tokens de medida: radios, anchos maximos y tipografia base.
+
+$radio: 0.875rem;
+$radio-campo: 0.625rem;
+$radio-pildora: 999px;
+
+$ancho-inicio: 28.75rem;
+$ancho-pantalla: 40rem;
+$ancho-modal: 35rem;
+$ancho-confirmacion: 24rem;
+$ancho-logo-cabecera: 11rem;
+
+$fuente-base:
+  system-ui,
+  -apple-system,
+  'Segoe UI',
+  Roboto,
+  sans-serif;

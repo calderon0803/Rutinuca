@@ -1,0 +1,26 @@
+// Tokens de color del proyecto. Unico sitio donde se escriben literales de color:
+// cualquier otro fichero los consume via @use 'variables'.
+
+// Escala neutra, de mas oscuro (fondo) a mas claro (texto principal).
+$color-base-00: #0f1216; // fondo de la app
+$color-base-10: #171c22; // superficie (tarjetas, campos)
+$color-base-20: #1e242c; // superficie elevada (botones secundarios, chips)
+$color-base-30: #2a323c; // bordes
+$color-base-40: #3a4552; // borde en hover
+$color-base-50: #5c6874; // texto deshabilitado y placeholders
+$color-base-60: #93a1b1; // texto secundario
+$color-base-90: #e8edf2; // texto principal
+
+$color-black: #000;
+
+// Acento y estados.
+$color-primary: #f4623a;
+$color-primary-dark: #d64d27;
+$color-primary-contrast: #14181c; // texto sobre el acento
+$color-success: #3ecf8e;
+$color-danger: #ff6b6b;
+$color-info: #8fb0ff;
+
+// Composiciones derivadas de los tokens anteriores.
+$color-overlay: rgba($color-base-00, 0.7);
+$box-shadow-modal: 0 0.625rem 1.875rem rgba($color-black, 0.45);

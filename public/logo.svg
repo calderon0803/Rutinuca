@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 86" role="img" aria-label="Rutinuca">
+  <text
+    x="160"
+    y="44"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    font-size="44"
+    font-weight="800"
+    fill="#e8edf2"
+  >Rutinuca</text>
+
+  <rect x="40" y="60" width="240" height="6" rx="3" fill="#3a4552" />
+
+  <rect x="52" y="48" width="11" height="30" rx="3" fill="#f4623a" />
+  <rect x="257" y="48" width="11" height="30" rx="3" fill="#f4623a" />
+  <rect x="40" y="53" width="8" height="20" rx="2.5" fill="#f4623a" />
+  <rect x="272" y="53" width="8" height="20" rx="2.5" fill="#f4623a" />
+</svg>

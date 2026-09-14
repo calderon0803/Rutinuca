@@ -1,0 +1,202 @@
+@use 'variables' as v;
+
+// Pantalla de inicio.
+.inicio {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5rem;
+  min-height: 100dvh;
+  max-width: v.$ancho-inicio;
+  margin: 0 auto;
+  padding: 2rem 1.25rem calc(2rem + env(safe-area-inset-bottom));
+
+  &__marca {
+    text-align: center;
+  }
+
+  // El titulo es la marca: el tamano lo manda el ancho del SVG.
+  &__titulo {
+    margin: 0;
+    padding: 0 1rem;
+  }
+
+  &__acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+// Pantallas con cabecera y listado.
+.pantalla {
+  max-width: v.$ancho-pantalla;
+  margin: 0 auto;
+  padding: 1.5rem 1rem calc(2rem + env(safe-area-inset-bottom));
+}
+
+.cabecera {
+  margin-bottom: 1.25rem;
+
+  // Cabecera de marca: el logo centrado en lugar del titulo.
+  &--marca {
+    text-align: center;
+  }
+
+  &__logo {
+    max-width: v.$ancho-logo-cabecera;
+    margin: 0 auto;
+  }
+
+  &__titulo {
+    margin: 0;
+    font-size: 1.7rem;
+    letter-spacing: -0.02em;
+  }
+
+  &__sub {
+    margin: 0.25rem 0 0;
+    color: v.$color-base-60;
+    font-size: 0.9rem;
+  }
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid v.$color-base-30;
+  border-radius: v.$radio;
+  background: v.$color-base-10;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    background: v.$color-base-20;
+    border-color: v.$color-base-40;
+  }
+
+  &--completa {
+    border-color: rgba(v.$color-success, 0.45);
+  }
+
+  // La tarjeta de rutina lleva una franja de acento en el canto izquierdo.
+  &--rutina {
+    position: relative;
+    overflow: hidden;
+    padding-left: 1.5rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 0.3125rem;
+      background: v.$color-primary;
+    }
+  }
+
+  &__principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  &__titulo {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  &__pareja {
+    color: v.$color-primary;
+    font-size: 0.9rem;
+  }
+
+  &__meta {
+    color: v.$color-base-60;
+    font-size: 0.85rem;
+  }
+
+  &__flecha {
+    color: v.$color-primary;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+}
+
+.progreso {
+  flex-shrink: 0;
+  padding: 0.375rem 0.625rem;
+  border-radius: v.$radio-pildora;
+  background: v.$color-base-20;
+  color: v.$color-base-60;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+
+  &--completo {
+    background: rgba(v.$color-success, 0.15);
+    color: v.$color-success;
+  }
+}
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.375rem;
+  margin-top: 1.75rem;
+
+  // Cuando todas las acciones son secundarias van juntas, como un bloque.
+  &--compacto {
+    gap: 0;
+  }
+}
+
+// Distintivos de la tarjeta del ejercicio.
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+}
+
+.etiqueta {
+  padding: 0.125rem 0.5rem;
+  border-radius: v.$radio-pildora;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &--normal {
+    background: rgba(v.$color-base-60, 0.16);
+    color: v.$color-base-60;
+  }
+
+  &--topset {
+    background: rgba(v.$color-primary, 0.16);
+    color: v.$color-primary;
+  }
+
+  &--superserie {
+    background: rgba(v.$color-info, 0.16);
+    color: v.$color-info;
+  }
+}

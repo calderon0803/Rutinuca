@@ -1,0 +1,5 @@
+// Tokens de breakpoint. La base de los estilos es el movil: todas las media
+// queries son min-width y van agrupadas al final de cada fichero.
+
+$breakpoint-mobile-to-tablet: 48rem; // 768px
+$breakpoint-tablet-to-desktop: 64rem; // 1024px

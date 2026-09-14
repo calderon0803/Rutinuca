@@ -1,0 +1,42 @@
+@use 'variables' as v;
+
+// Reset minimo y ajustes globales de documento.
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: v.$color-base-00;
+  color: v.$color-base-90;
+  font-family: v.$fuente-base;
+  -webkit-text-size-adjust: 100%;
+}
+
+// Bloquea el scroll del fondo mientras hay un modal abierto.
+body.sin-scroll {
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid v.$color-primary;
+  outline-offset: 2px;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
