@@ -58,13 +58,22 @@ function normalizarEjercicio(bruto, ruta, { permitirSuperserie }) {
   const nombre = String(bruto.ejercicio ?? '').trim()
   if (!nombre) throw new ErrorRutina(`${ruta}: falta la propiedad "ejercicio".`)
 
-  const reps = Array.isArray(bruto.repeticiones_por_serie)
-    ? bruto.repeticiones_por_serie.map(normalizarObjetivo)
-    : null
-  const series = aEntero(bruto.series, reps ? reps.length : 1)
+  if (bruto.repeticiones_por_serie !== undefined) {
+    throw new ErrorRutina(
+      `${ruta}: "repeticiones_por_serie" ya no existe, los objetivos van dentro de "series".`,
+    )
+  }
 
-  // Las series mandan sobre el array: lo recortamos o rellenamos para que cuadren.
-  const repeticiones = Array.from({ length: series }, (_, i) => (reps ? (reps[i] ?? null) : null))
+  // "series" es el array de objetivos, uno por serie; su longitud manda. Tambien
+  // vale un numero suelto cuando no quieres fijar objetivo.
+  let repeticiones
+  if (Array.isArray(bruto.series)) {
+    if (bruto.series.length === 0) throw new ErrorRutina(`${ruta}: "series" esta vacio.`)
+    repeticiones = bruto.series.map(normalizarObjetivo)
+  } else {
+    repeticiones = Array.from({ length: aEntero(bruto.series, 1) }, () => null)
+  }
+  const series = repeticiones.length
 
   const ejercicio = {
     ejercicio: nombre,
@@ -146,8 +155,9 @@ export async function leerFicheroRutinas(fichero) {
 function ejercicioExportable(ejercicio, esPareja) {
   const salida = { ejercicio: ejercicio.ejercicio }
   if (ejercicio.indicaciones) salida.indicaciones = ejercicio.indicaciones
-  salida.series = ejercicio.series
-  salida.repeticiones_por_serie = ejercicio.repeticiones_por_serie.map(formatearObjetivo)
+  const objetivos = ejercicio.repeticiones_por_serie.map(formatearObjetivo)
+  // Sin objetivos no tiene sentido el array: basta con cuantas series son.
+  salida.series = objetivos.every((o) => o === '') ? ejercicio.series : objetivos
 
   // La pareja de una superserie no lleva sus propios distintivos.
   if (esPareja) return salida

@@ -74,6 +74,31 @@
   }
 }
 
+.leyenda {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+
+  &__fila {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  &__texto {
+    margin: 0;
+    color: v.$color-base-60;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  // El enlace que abre la leyenda, bajo la lista de ejercicios.
+  &__enlace {
+    margin: 0.75rem auto 0;
+  }
+}
+
 // Bloque de un ejercicio dentro del modal.
 .bloque {
   display: flex;

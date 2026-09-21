@@ -11,32 +11,29 @@ export const PLANTILLA = {
       ejercicios: [
         {
           ejercicio: 'Press banca',
-          indicaciones: 'Escápulas retraídas, barra a la línea del pecho, muñecas alineadas.',
-          series: 4,
-          repeticiones_por_serie: ['8-10', '8-10', '8-10', '6-8'],
+          indicaciones:
+            'Escápulas retraídas, barra a la línea del pecho, muñecas alineadas. La primera serie es la pesada; en las siguientes baja carga.',
+          series: ['6-8', '8-10', '8-10', '10-12'],
           topset: true,
           superserie: false,
         },
         {
           ejercicio: 'Press militar',
           indicaciones: 'Agarre a la anchura de hombros, no arquear excesivamente la espalda baja.',
-          series: 3,
-          repeticiones_por_serie: ['10-12', '10-12', '10-12'],
+          series: ['10-12', '10-12', '10-12'],
           topset: false,
           superserie: true,
           superserie_ejercicio: {
             ejercicio: 'Elevaciones laterales',
             indicaciones:
               'Subir hasta la altura del hombro, sin impulso, contracción de 1 segundo arriba.',
-            series: 3,
-            repeticiones_por_serie: ['12-15', '12-15', '12-15'],
+            series: ['12-15', '12-15', '12-15'],
           },
         },
         {
           ejercicio: 'Fondos en paralelas',
           indicaciones: 'Torso ligeramente inclinado, bajar hasta que el codo forme 90 grados.',
-          series: 3,
-          repeticiones_por_serie: ['10-12', '8-10', '6-8'],
+          series: ['10-12', '10-12', '10-12'],
           topset: false,
           superserie: false,
         },
@@ -47,24 +44,22 @@ export const PLANTILLA = {
       ejercicios: [
         {
           ejercicio: 'Dominadas',
-          indicaciones: 'Agarre prono, sin balanceo, barbilla por encima de la barra.',
-          series: 4,
-          repeticiones_por_serie: ['6-8', '6-8', '5-6', '5-6'],
+          indicaciones:
+            'Agarre prono, sin balanceo, barbilla por encima de la barra. La primera serie es la pesada (con lastre si hace falta); en las siguientes quita peso.',
+          series: ['5-6', '6-8', '6-8', '8-10'],
           topset: true,
           superserie: false,
         },
         {
           ejercicio: 'Remo con barra',
           indicaciones: 'Espalda neutra, tirar hacia el ombligo, pausa de 1 segundo arriba.',
-          series: 3,
-          repeticiones_por_serie: ['8-10', '8-10', '8-10'],
+          series: ['8-10', '8-10', '8-10'],
           topset: false,
           superserie: true,
           superserie_ejercicio: {
             ejercicio: 'Curl martillo',
             indicaciones: 'Codos pegados al cuerpo, bajada controlada en 2 segundos.',
-            series: 3,
-            repeticiones_por_serie: ['10-12', '10-12', '10-12'],
+            series: ['10-12', '10-12', '10-12'],
           },
         },
       ],

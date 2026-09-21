@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import Etiquetas from './Etiquetas'
+import Leyenda from './Leyenda'
 import { plural, resumenSeries, totalSeries } from '../lib/rutinas'
 import { seriesHechas, ultimaSesion } from '../lib/storage'
 import { formatearFecha } from '../lib/fechas'
@@ -15,6 +17,7 @@ export default function DetalleRutina({
   onReiniciar,
 }) {
   const ultima = ultimaSesion(historial, rutina.id)
+  const [verLeyenda, setVerLeyenda] = useState(false)
 
   return (
     <div className="pantalla">
@@ -60,6 +63,14 @@ export default function DetalleRutina({
         })}
       </ul>
 
+      <button
+        type="button"
+        className="boton boton--fantasma boton--pequeno leyenda__enlace"
+        onClick={() => setVerLeyenda(true)}
+      >
+        ¿Qué significan las etiquetas?
+      </button>
+
       <footer className="pie">
         <button
           type="button"
@@ -73,6 +84,8 @@ export default function DetalleRutina({
           Reiniciar registro de esta rutina
         </button>
       </footer>
+
+      {verLeyenda && <Leyenda onCerrar={() => setVerLeyenda(false)} />}
     </div>
   )
 }

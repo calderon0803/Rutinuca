@@ -61,15 +61,13 @@ una rutina suelta.
         {
           "ejercicio": "Press militar",
           "indicaciones": "Agarre a la anchura de hombros, no arquear excesivamente la espalda baja.",
-          "series": 3,
-          "repeticiones_por_serie": ["10-12", "10-12", "8-10"],
+          "series": ["10-12", "10-12", "8-10"],
           "topset": false,
           "superserie": true,
           "superserie_ejercicio": {
             "ejercicio": "Elevaciones laterales",
             "indicaciones": "Subir hasta la altura del hombro, sin impulso.",
-            "series": 3,
-            "repeticiones_por_serie": ["12-15", "12-15", "12-15"]
+            "series": ["12-15", "12-15", "12-15"]
           }
         }
       ]
@@ -84,13 +82,23 @@ una rutina suelta.
 | `ejercicios` | sí | Array con al menos un ejercicio. |
 | `ejercicio` | sí | Nombre del ejercicio. |
 | `indicaciones` | no | Texto libre que se muestra en el modal. |
-| `series` | no | Si falta, se deduce de `repeticiones_por_serie` (o 1). |
-| `repeticiones_por_serie` | no | Objetivo por serie, como rango: `"8-10"`. También valen `[8, 10]` y un número suelto (`10`, rango cerrado). Se recorta o rellena hasta cuadrar con `series`. |
+| `series` | no | Un objetivo por serie: `["8-10", "8-10", "6-8"]` son tres series. El objetivo se escribe como rango (`"8-10"`, también `"8 a 10"` o `[8, 10]`) o como número suelto (`10`). Si no quieres fijar objetivos, pon solo cuántas son: `"series": 4`. Por defecto, 1. |
 | `topset` | no | Distintivo en la lista y marca la **primera serie** del ejercicio como top set. |
 | `superserie_ejercicio` | no | Mismo formato (sin anidar otra superserie). Su presencia activa la superserie. |
 
 No hay campo de calentamiento: si quieres series de aproximación, añádelas como
 una serie más del ejercicio con sus repeticiones.
+
+### Las etiquetas
+
+Cada ejercicio se muestra en la lista con un distintivo, según lo que digan sus
+campos. En la app se explican pulsando **¿Qué significan las etiquetas?**
+
+| Etiqueta | Cuándo sale | Qué significa |
+| --- | --- | --- |
+| `NORMAL` | ni `topset` ni superserie | Series sueltas, con su descanso entre una y otra. |
+| `TOP SET` | `"topset": true` | La serie más pesada del ejercicio. Va la primera y marca el peso de referencia; las siguientes suelen bajar carga. |
+| `SUPERSERIE` | hay `superserie_ejercicio` | El ejercicio va encadenado con otro: una serie de cada uno seguidas, sin descanso. |
 
 Si el fichero no cuadra, la importación se cancela y se explica el motivo debajo
 del botón.
