@@ -1,0 +1,31 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# La app es una SPA de una sola pagina real: sin esto, recargar en una ruta que
+# no sea la raiz busca un fichero que no existe y Netlify devuelve su 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# sw.js, registerSW.js y manifest.webmanifest son los unicos ficheros del build
+# cuyo nombre no lleva hash: su URL es siempre la misma entre despliegues. El
+# service worker va en registerType: 'autoUpdate', o sea que quien tiene la PWA
+# instalada solo se entera de que hay version nueva cuando el navegador vuelve a
+# pedir sw.js; si el CDN le sirve una copia cacheada, se queda anclado en la
+# version vieja y no se actualiza nunca. Con no-cache se revalida siempre.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
