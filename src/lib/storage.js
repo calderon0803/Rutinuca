@@ -3,6 +3,7 @@
 const CLAVE_RUTINAS = 'rutinuca:rutinas'
 const CLAVE_REGISTROS = 'rutinuca:registros'
 const CLAVE_HISTORIAL = 'rutinuca:historial'
+const CLAVE_SEPARADAS = 'rutinuca:separadas'
 
 // Sesiones que se conservan por rutina; las mas viejas se descartan.
 const MAX_SESIONES = 20
@@ -32,6 +33,7 @@ function olvidarTodo() {
     localStorage.removeItem(CLAVE_RUTINAS)
     localStorage.removeItem(CLAVE_REGISTROS)
     localStorage.removeItem(CLAVE_HISTORIAL)
+    localStorage.removeItem(CLAVE_SEPARADAS)
   } catch {
     // Almacenamiento bloqueado: no hay nada que limpiar.
   }
@@ -153,6 +155,30 @@ export function referenciaAnterior(historial, rutinaId, clave, indiceSerie) {
     if (serie) return serie
   }
   return null
+}
+
+/**
+ * Superseries que hoy se hacen por separado: { [rutinaId]: { [clave]: true } }.
+ * Es del entrenamiento en curso, no de la rutina, asi que se borra al cerrarlo.
+ */
+export const cargarSeparadas = () => leer(CLAVE_SEPARADAS, {})
+export const guardarSeparadas = (separadas) => escribir(CLAVE_SEPARADAS, separadas)
+
+export function estaSeparada(separadas, rutinaId, clave) {
+  return Boolean(separadas?.[rutinaId]?.[clave])
+}
+
+export function alternarSeparada(separadas, rutinaId, clave) {
+  const deRutina = { ...(separadas[rutinaId] ?? {}) }
+  if (deRutina[clave]) delete deRutina[clave]
+  else deRutina[clave] = true
+  return { ...separadas, [rutinaId]: deRutina }
+}
+
+export function limpiarSeparadas(separadas, rutinaId) {
+  const copia = { ...separadas }
+  delete copia[rutinaId]
+  return copia
 }
 
 /** Borra el registro de una rutina completa (para empezar la sesion de cero). */

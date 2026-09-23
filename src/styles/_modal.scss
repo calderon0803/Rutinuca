@@ -119,6 +119,11 @@
   &__enlace {
     margin: 0;
     color: v.$color-info;
+
+    // Hoy no se encadena: el vinculo pierde el color de superserie.
+    &--separado {
+      color: v.$color-base-60;
+    }
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -217,6 +222,10 @@
   &::placeholder {
     color: v.$color-base-50;
   }
+
+  &[aria-invalid='true'] {
+    border-color: v.$color-danger;
+  }
 }
 
 // Casilla propia: la nativa no se deja pintar y en el movil se queda pequena.
@@ -263,6 +272,23 @@
 
   &:active {
     transform: scale(0.92);
+  }
+}
+
+.separacion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed v.$color-base-30;
+
+  &__pista {
+    margin: 0;
+    color: v.$color-base-50;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    text-align: center;
   }
 }
 

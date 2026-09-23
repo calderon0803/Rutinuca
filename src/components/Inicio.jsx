@@ -3,8 +3,8 @@ import Logo from './Logo'
 import { PLANTILLA, descargarPlantilla } from '../data/plantilla'
 import { normalizarImportacion } from '../lib/rutinas'
 
-/** Primera pantalla: cargar una rutina, propia o la de ejemplo. */
-export default function Inicio({ onImportar }) {
+/** Primera pantalla: crear una rutina, cargar la tuya o la de ejemplo. */
+export default function Inicio({ onImportar, onCrear }) {
   return (
     <div className="inicio">
       <div className="inicio__marca">
@@ -15,6 +15,9 @@ export default function Inicio({ onImportar }) {
 
       <div className="inicio__acciones">
         <BotonImportar onImportar={onImportar}>Importar rutina</BotonImportar>
+        <button type="button" className="boton boton--secundario" onClick={onCrear}>
+          Crear una rutina
+        </button>
         <button
           type="button"
           className="boton boton--secundario"

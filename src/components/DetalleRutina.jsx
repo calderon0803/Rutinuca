@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Etiquetas from './Etiquetas'
 import Leyenda from './Leyenda'
 import { plural, resumenSeries, totalSeries } from '../lib/rutinas'
-import { seriesHechas, ultimaSesion } from '../lib/storage'
+import { claveEjercicio, estaSeparada, seriesHechas, ultimaSesion } from '../lib/storage'
 import { formatearFecha } from '../lib/fechas'
 
 /** Lista de ejercicios de una rutina; cada uno abre su modal. */
@@ -10,6 +10,7 @@ export default function DetalleRutina({
   rutina,
   registros,
   historial,
+  separadas,
   onVolver,
   onAbrirEjercicio,
   onFinalizar,
@@ -35,6 +36,11 @@ export default function DetalleRutina({
       <ul className="lista">
         {rutina.ejercicios.map((ejercicio, indice) => {
           const hechas = seriesHechas(registros, rutina.id, indice, ejercicio)
+          const separada = estaSeparada(
+            separadas,
+            rutina.id,
+            claveEjercicio(indice, ejercicio.ejercicio),
+          )
           const total = totalSeries(ejercicio)
           const completo = hechas === total
           return (
@@ -51,8 +57,11 @@ export default function DetalleRutina({
                       + {ejercicio.superserie_ejercicio.ejercicio}
                     </span>
                   )}
-                  <span className="tarjeta__meta">{resumenSeries(ejercicio)}</span>
-                  <Etiquetas ejercicio={ejercicio} />
+                  <span className="tarjeta__meta">
+                    {ejercicio.grupo && `${ejercicio.grupo} · `}
+                    {resumenSeries(ejercicio)}
+                  </span>
+                  <Etiquetas ejercicio={ejercicio} separada={separada} />
                 </span>
                 <span className={`progreso${completo ? ' progreso--completo' : ''}`}>
                   {hechas}/{total}

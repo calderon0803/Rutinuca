@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react'
 import { formatearObjetivo } from '../lib/rutinas'
-import { claveEjercicio, referenciaAnterior, serieRegistrada } from '../lib/storage'
+import { claveEjercicio, estaSeparada, referenciaAnterior, serieRegistrada } from '../lib/storage'
 import { resumenSerie } from '../lib/fechas'
 
 function BloqueSeries({
@@ -12,6 +12,7 @@ function BloqueSeries({
   onCambiar,
   onReplicar,
   esPareja,
+  separada,
 }) {
   const series = Array.from({ length: ejercicio.series }, (_, i) => i)
 
@@ -20,7 +21,9 @@ function BloqueSeries({
       {/* El titular del ejercicio principal ya esta en la barra del modal. */}
       {esPareja && (
         <header className="bloque__cabecera">
-          <p className="bloque__enlace">En superserie con</p>
+          <p className={`bloque__enlace${separada ? ' bloque__enlace--separado' : ''}`}>
+            {separada ? 'Hoy, por separado' : 'En superserie con'}
+          </p>
           <h3 className="bloque__titulo">{ejercicio.ejercicio}</h3>
         </header>
       )}
@@ -119,8 +122,10 @@ export default function EjercicioModal({
   ejercicio,
   registros,
   historial,
+  separadas,
   onCambiar,
   onReplicar,
+  onSeparar,
   onCerrar,
 }) {
   const cerrarRef = useRef(null)
@@ -139,6 +144,8 @@ export default function EjercicioModal({
   }, [onCerrar])
 
   const pareja = ejercicio.superserie_ejercicio
+  const clave = claveEjercicio(indice, ejercicio.ejercicio)
+  const separada = estaSeparada(separadas, rutinaId, clave)
 
   return (
     <div className="fondo-modal" onClick={onCerrar}>
@@ -165,7 +172,7 @@ export default function EjercicioModal({
         <div className="modal__cuerpo">
           <BloqueSeries
             ejercicio={ejercicio}
-            clave={claveEjercicio(indice, ejercicio.ejercicio)}
+            clave={clave}
             rutinaId={rutinaId}
             registros={registros}
             historial={historial}
@@ -176,6 +183,7 @@ export default function EjercicioModal({
           {pareja && (
             <BloqueSeries
               esPareja
+              separada={separada}
               ejercicio={pareja}
               clave={claveEjercicio(indice, pareja.ejercicio, true)}
               rutinaId={rutinaId}
@@ -184,6 +192,23 @@ export default function EjercicioModal({
               onCambiar={onCambiar}
               onReplicar={onReplicar}
             />
+          )}
+
+          {pareja && (
+            <div className="separacion">
+              <button
+                type="button"
+                className="boton boton--fantasma boton--pequeno"
+                onClick={() => onSeparar(clave)}
+              >
+                {separada ? 'Volver a encadenarlos' : 'Hoy no puedo encadenarlos'}
+              </button>
+              <p className="separacion__pista">
+                {separada
+                  ? 'Los dos ejercicios van sueltos, con su descanso. Solo para el entrenamiento de hoy.'
+                  : 'Si la máquina está ocupada, sepáralos y hazlos por turnos sin tocar la rutina.'}
+              </p>
+            </div>
           )}
 
           <p className="nota">Los pesos y repeticiones se guardan solos en este dispositivo.</p>

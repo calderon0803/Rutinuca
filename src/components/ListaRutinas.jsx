@@ -1,6 +1,6 @@
 import Logo from './Logo'
 import { seriesHechas } from '../lib/storage'
-import { aFormatoExportable, plural, totalSeries } from '../lib/rutinas'
+import { aFormatoExportable, plural, totalSeries, zonasDeRutina } from '../lib/rutinas'
 import { descargarJson } from '../lib/descargas'
 
 function progresoRutina(registros, rutina) {
@@ -26,6 +26,7 @@ export default function ListaRutinas({ rutinas, registros, onAbrir, onEliminar }
       <ul className="lista">
         {rutinas.map((rutina) => {
           const { hechas, total } = progresoRutina(registros, rutina)
+          const zonas = zonasDeRutina(rutina)
           return (
             <li key={rutina.id}>
               <button
@@ -39,6 +40,15 @@ export default function ListaRutinas({ rutinas, registros, onAbrir, onEliminar }
                     {plural(rutina.ejercicios.length, 'ejercicio', 'ejercicios')} · {hechas}/{total}{' '}
                     series
                   </span>
+                  {zonas.length > 0 && (
+                    <span className="pildoras">
+                      {zonas.map((zona) => (
+                        <span className="pildora" key={zona}>
+                          {zona}
+                        </span>
+                      ))}
+                    </span>
+                  )}
                 </span>
                 <span className="tarjeta__flecha" aria-hidden="true">
                   ›

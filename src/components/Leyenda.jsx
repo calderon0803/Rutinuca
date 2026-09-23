@@ -60,6 +60,7 @@ export default function Leyenda({ onCerrar }) {
         </div>
 
         <div className="modal__cuerpo">
+          <p className="nota">Cada ejercicio es de uno de estos tres tipos.</p>
           <dl className="leyenda">
             {ETIQUETAS.map(({ tipo, texto, explicacion }) => (
               <div className="leyenda__fila" key={tipo}>

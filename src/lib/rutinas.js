@@ -1,4 +1,22 @@
 // Normalizacion y validacion del JSON de rutinas importado por el usuario.
+// La validacion es estricta a proposito: el fichero solo puede contener lo que
+// la app sabe hacer, asi que una clave o un valor de mas cancela la importacion.
+
+import { GRUPOS_MUSCULARES, ZONAS, zonaDe } from '../data/grupos'
+
+const CLAVES_FICHERO = ['rutinas']
+const CLAVES_RUTINA = ['rutina', 'ejercicios']
+const CLAVES_EJERCICIO = [
+  'ejercicio',
+  'grupo',
+  'indicaciones',
+  'series',
+  'topset',
+  'superserie',
+  'superserie_ejercicio',
+]
+// La pareja de una superserie no lleva distintivos ni anida otra superserie.
+const CLAVES_PAREJA = ['ejercicio', 'grupo', 'indicaciones', 'series']
 
 /** Convierte un texto en un identificador estable y legible. */
 export function slug(texto) {
@@ -17,6 +35,33 @@ class ErrorRutina extends Error {}
 function aEntero(valor, porDefecto) {
   const n = Number(valor)
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : porDefecto
+}
+
+/** Corta la importacion si el objeto trae claves que la app no usa. */
+function revisarClaves(bruto, permitidas, ruta) {
+  const sobran = Object.keys(bruto).filter((clave) => !permitidas.includes(clave))
+  if (sobran.length > 0) {
+    const lista = sobran.map((c) => `"${c}"`).join(', ')
+    throw new ErrorRutina(
+      `${ruta}: la app no contempla ${lista}. Admite: ${permitidas.join(', ')}.`,
+    )
+  }
+}
+
+function leerTexto(bruto, clave, ruta) {
+  const valor = bruto[clave]
+  if (valor === undefined) return ''
+  if (typeof valor !== 'string') throw new ErrorRutina(`${ruta}: "${clave}" tiene que ser texto.`)
+  return valor.trim()
+}
+
+function leerBooleano(bruto, clave, ruta) {
+  const valor = bruto[clave]
+  if (valor === undefined) return false
+  if (typeof valor !== 'boolean') {
+    throw new ErrorRutina(`${ruta}: "${clave}" tiene que ser true o false.`)
+  }
+  return valor
 }
 
 /** Ordena un par de extremos y tolera que falte uno de los dos. */
@@ -45,6 +90,12 @@ function normalizarObjetivo(valor) {
   return suelto == null ? null : { min: suelto, max: suelto }
 }
 
+/** Un objetivo escrito a mano vale si esta vacio o si se entiende. */
+export function esObjetivoValido(texto) {
+  const limpio = String(texto ?? '').trim()
+  return limpio === '' || normalizarObjetivo(limpio) != null
+}
+
 /** "8-10", o "10" cuando el rango es cerrado. */
 export function formatearObjetivo(objetivo) {
   if (!objetivo) return ''
@@ -55,12 +106,21 @@ function normalizarEjercicio(bruto, ruta, { permitirSuperserie }) {
   if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) {
     throw new ErrorRutina(`${ruta}: se esperaba un objeto de ejercicio.`)
   }
-  const nombre = String(bruto.ejercicio ?? '').trim()
-  if (!nombre) throw new ErrorRutina(`${ruta}: falta la propiedad "ejercicio".`)
 
   if (bruto.repeticiones_por_serie !== undefined) {
     throw new ErrorRutina(
       `${ruta}: "repeticiones_por_serie" ya no existe, los objetivos van dentro de "series".`,
+    )
+  }
+  revisarClaves(bruto, permitirSuperserie ? CLAVES_EJERCICIO : CLAVES_PAREJA, ruta)
+
+  const nombre = leerTexto(bruto, 'ejercicio', ruta)
+  if (!nombre) throw new ErrorRutina(`${ruta}: falta la propiedad "ejercicio".`)
+
+  const grupo = leerTexto(bruto, 'grupo', ruta)
+  if (grupo && !GRUPOS_MUSCULARES.includes(grupo)) {
+    throw new ErrorRutina(
+      `${ruta}: el grupo muscular "${grupo}" no existe. Elige uno de: ${GRUPOS_MUSCULARES.join(', ')}.`,
     )
   }
 
@@ -69,32 +129,60 @@ function normalizarEjercicio(bruto, ruta, { permitirSuperserie }) {
   let repeticiones
   if (Array.isArray(bruto.series)) {
     if (bruto.series.length === 0) throw new ErrorRutina(`${ruta}: "series" esta vacio.`)
-    repeticiones = bruto.series.map(normalizarObjetivo)
+    repeticiones = bruto.series.map((valor, i) => {
+      const objetivo = normalizarObjetivo(valor)
+      if (objetivo == null && valor !== '' && valor != null) {
+        throw new ErrorRutina(
+          `${ruta}: no se entiende el objetivo "${valor}" de la serie ${i + 1}. Escribelo como "8-10" o como un numero.`,
+        )
+      }
+      return objetivo
+    })
+  } else if (bruto.series === undefined) {
+    repeticiones = [null]
   } else {
-    repeticiones = Array.from({ length: aEntero(bruto.series, 1) }, () => null)
+    const cuantas = aEntero(bruto.series, null)
+    if (cuantas == null) {
+      throw new ErrorRutina(`${ruta}: "series" tiene que ser una lista de objetivos o un numero.`)
+    }
+    repeticiones = Array.from({ length: cuantas }, () => null)
   }
-  const series = repeticiones.length
 
   const ejercicio = {
     ejercicio: nombre,
-    indicaciones: String(bruto.indicaciones ?? '').trim(),
-    series,
+    grupo,
+    indicaciones: leerTexto(bruto, 'indicaciones', ruta),
+    series: repeticiones.length,
     repeticiones_por_serie: repeticiones,
-    topset: Boolean(bruto.topset),
+    topset: permitirSuperserie ? leerBooleano(bruto, 'topset', ruta) : false,
     superserie: false,
     superserie_ejercicio: null,
   }
 
-  if (permitirSuperserie && bruto.superserie_ejercicio) {
-    ejercicio.superserie_ejercicio = normalizarEjercicio(
-      bruto.superserie_ejercicio,
-      `${ruta} > superserie_ejercicio`,
-      { permitirSuperserie: false },
-    )
-    ejercicio.superserie = true
-  } else if (permitirSuperserie) {
-    // Marcada como superserie pero sin pareja: la ignoramos en vez de romper la importacion.
-    ejercicio.superserie = false
+  if (permitirSuperserie) {
+    const tienePareja = bruto.superserie_ejercicio !== undefined
+    const marcada = leerBooleano(bruto, 'superserie', ruta)
+    // El distintivo y la pareja tienen que decir lo mismo.
+    if (bruto.superserie !== undefined && marcada !== tienePareja) {
+      throw new ErrorRutina(
+        tienePareja
+          ? `${ruta}: hay "superserie_ejercicio" pero "superserie" es false.`
+          : `${ruta}: "superserie" es true pero falta "superserie_ejercicio".`,
+      )
+    }
+    if (tienePareja && ejercicio.topset) {
+      throw new ErrorRutina(
+        `${ruta}: un ejercicio es top set o superserie, no las dos cosas a la vez.`,
+      )
+    }
+    if (tienePareja) {
+      ejercicio.superserie_ejercicio = normalizarEjercicio(
+        bruto.superserie_ejercicio,
+        `${ruta} > superserie_ejercicio`,
+        { permitirSuperserie: false },
+      )
+      ejercicio.superserie = true
+    }
   }
 
   return ejercicio
@@ -104,10 +192,12 @@ function normalizarRutina(bruto, indice) {
   if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) {
     throw new ErrorRutina(`Rutina ${indice + 1}: se esperaba un objeto.`)
   }
-  const nombre = String(bruto.rutina ?? '').trim()
+  revisarClaves(bruto, CLAVES_RUTINA, `Rutina ${indice + 1}`)
+
+  const nombre = leerTexto(bruto, 'rutina', `Rutina ${indice + 1}`)
   if (!nombre) throw new ErrorRutina(`Rutina ${indice + 1}: falta la propiedad "rutina".`)
 
-  const listaBruta = bruto.ejercicios ?? bruto.ejercicio ?? bruto.lista
+  const listaBruta = bruto.ejercicios
   if (!Array.isArray(listaBruta) || listaBruta.length === 0) {
     throw new ErrorRutina(`"${nombre}": falta el array de ejercicios.`)
   }
@@ -129,8 +219,10 @@ function normalizarRutina(bruto, indice) {
 export function normalizarImportacion(datos) {
   let brutas
   if (Array.isArray(datos)) brutas = datos
-  else if (datos && Array.isArray(datos.rutinas)) brutas = datos.rutinas
-  else if (datos && typeof datos === 'object' && datos.rutina) brutas = [datos]
+  else if (datos && Array.isArray(datos.rutinas)) {
+    revisarClaves(datos, CLAVES_FICHERO, 'El fichero')
+    brutas = datos.rutinas
+  } else if (datos && typeof datos === 'object' && datos.rutina) brutas = [datos]
   else
     throw new ErrorRutina(
       'El JSON debe ser una rutina, un array de rutinas o { "rutinas": [...] }.',
@@ -154,6 +246,7 @@ export async function leerFicheroRutinas(fichero) {
 
 function ejercicioExportable(ejercicio, esPareja) {
   const salida = { ejercicio: ejercicio.ejercicio }
+  if (ejercicio.grupo) salida.grupo = ejercicio.grupo
   if (ejercicio.indicaciones) salida.indicaciones = ejercicio.indicaciones
   const objetivos = ejercicio.repeticiones_por_serie.map(formatearObjetivo)
   // Sin objetivos no tiene sentido el array: basta con cuantas series son.
@@ -178,6 +271,18 @@ export function aFormatoExportable(rutinas) {
       ejercicios: ejercicios.map((ejercicio) => ejercicioExportable(ejercicio, false)),
     })),
   }
+}
+
+/** Zonas del cuerpo que toca una rutina, en el orden de la lista de grupos. */
+export function zonasDeRutina(rutina) {
+  const tocadas = new Set()
+  rutina.ejercicios.forEach((ejercicio) => {
+    ;[ejercicio, ejercicio.superserie_ejercicio].forEach((cual) => {
+      const zona = zonaDe(cual?.grupo)
+      if (zona) tocadas.add(zona)
+    })
+  })
+  return ZONAS.map(({ zona }) => zona).filter((zona) => tocadas.has(zona))
 }
 
 /** Total de series de un ejercicio contando su superserie. */

@@ -4,17 +4,22 @@ import ListaRutinas from './components/ListaRutinas'
 import DetalleRutina from './components/DetalleRutina'
 import EjercicioModal from './components/EjercicioModal'
 import Confirmacion from './components/Confirmacion'
+import CrearRutina from './components/CrearRutina'
 import {
   actualizarSerie,
+  alternarSeparada,
   cargarHistorial,
   cargarRegistros,
   cargarRutinas,
+  cargarSeparadas,
   cerrarSesion,
   guardarHistorial,
   guardarRegistros,
   guardarRutinas,
+  guardarSeparadas,
   hayAlgoAnotado,
   limpiarRutina,
+  limpiarSeparadas,
   replicarPeso,
 } from './lib/storage'
 
@@ -22,9 +27,11 @@ export default function App() {
   const [rutinas, setRutinas] = useState(cargarRutinas)
   const [registros, setRegistros] = useState(cargarRegistros)
   const [historial, setHistorial] = useState(cargarHistorial)
+  const [separadas, setSeparadas] = useState(cargarSeparadas)
   const [rutinaId, setRutinaId] = useState(null)
   const [ejercicioAbierto, setEjercicioAbierto] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
+  const [creando, setCreando] = useState(false)
 
   useEffect(() => {
     guardarRutinas(rutinas)
@@ -37,6 +44,10 @@ export default function App() {
   useEffect(() => {
     guardarHistorial(historial)
   }, [historial])
+
+  useEffect(() => {
+    guardarSeparadas(separadas)
+  }, [separadas])
 
   const rutinaActiva = rutinas.find((r) => r.id === rutinaId) ?? null
 
@@ -56,11 +67,22 @@ export default function App() {
     [rutinaId],
   )
 
+  // Una superserie que hoy no se puede encadenar se hace por separado.
+  const separar = useCallback(
+    (clave) => setSeparadas((previas) => alternarSeparada(previas, rutinaId, clave)),
+    [rutinaId],
+  )
+
   const cerrarModal = useCallback(() => setEjercicioAbierto(null), [])
 
   // Solo hay una importación activa: para cargar otro fichero hay que eliminarla.
   function importar(nuevas) {
     setRutinas(nuevas)
+  }
+
+  function crearRutina(nuevas) {
+    setRutinas(nuevas)
+    setCreando(false)
   }
 
   function eliminarImportacion() {
@@ -71,6 +93,7 @@ export default function App() {
       alAceptar: () => {
         setRutinas([])
         setRegistros({})
+        setSeparadas({})
         setRutinaId(null)
       },
     })
@@ -85,6 +108,7 @@ export default function App() {
         const cerrada = cerrarSesion(registros, historial, rutinaId)
         setRegistros(cerrada.registros)
         setHistorial(cerrada.historial)
+        setSeparadas((previas) => limpiarSeparadas(previas, rutinaId))
         setRutinaId(null)
       },
     })
@@ -95,13 +119,18 @@ export default function App() {
       mensaje: 'Se descartará lo anotado en esta rutina, sin guardarlo en el historial.',
       textoAccion: 'Descartar',
       peligro: true,
-      alAceptar: () => setRegistros((previos) => limpiarRutina(previos, rutinaId)),
+      alAceptar: () => {
+        setRegistros((previos) => limpiarRutina(previos, rutinaId))
+        setSeparadas((previas) => limpiarSeparadas(previas, rutinaId))
+      },
     })
   }
 
   let pantalla
-  if (rutinas.length === 0) {
-    pantalla = <Inicio onImportar={importar} />
+  if (creando) {
+    pantalla = <CrearRutina onCrear={crearRutina} onCancelar={() => setCreando(false)} />
+  } else if (rutinas.length === 0) {
+    pantalla = <Inicio onImportar={importar} onCrear={() => setCreando(true)} />
   } else if (!rutinaActiva) {
     pantalla = (
       <ListaRutinas
@@ -118,6 +147,7 @@ export default function App() {
           rutina={rutinaActiva}
           registros={registros}
           historial={historial}
+          separadas={separadas}
           onVolver={() => setRutinaId(null)}
           onAbrirEjercicio={setEjercicioAbierto}
           onFinalizar={finalizarEntrenamiento}
@@ -131,7 +161,9 @@ export default function App() {
             ejercicio={rutinaActiva.ejercicios[ejercicioAbierto]}
             registros={registros}
             historial={historial}
+            separadas={separadas}
             onCambiar={cambiarSerie}
+            onSeparar={separar}
             onReplicar={replicar}
             onCerrar={cerrarModal}
           />

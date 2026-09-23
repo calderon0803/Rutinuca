@@ -21,13 +21,21 @@ rutinas se importan de un JSON y todo se persiste en `localStorage`.
 ## Estructura
 
 - `src/lib/rutinas.js` — normaliza y valida el JSON importado; es el único sitio
-  que decide qué formatos de fichero se aceptan.
+  que decide qué formatos de fichero se aceptan. La validación es **estricta**:
+  claves desconocidas, grupos fuera de lista, objetivos ilegibles o booleanos
+  mal escritos cancelan la importación, para que un fichero no pueda declarar
+  nada que la app no sepa hacer.
 - `src/lib/storage.js` — lectura/escritura de `rutinuca:rutinas`,
-  `rutinuca:registros` y `rutinuca:historial`, más los helpers de progreso y de
-  cierre de sesión.
+  `rutinuca:registros`, `rutinuca:separadas` y `rutinuca:historial`, más los
+  helpers de progreso y de cierre de sesión. Lo que es del entrenamiento en
+  curso (registro y superseries separadas) se borra al finalizarlo.
 - `src/lib/fechas.js` — formato de fechas y resumen de una serie anotada.
 - `src/components/` — `Inicio`, `ListaRutinas`, `DetalleRutina`, `EjercicioModal`.
 - `src/data/plantilla.js` — plantilla de ejemplo que se descarga desde el inicio.
+- `src/data/grupos.js` — lista cerrada de grupos musculares del formulario.
+- `CrearRutina` + `EjercicioFormulario` — alta de rutinas dentro de la app. El
+  formulario produce objetos en **formato de fichero** y los pasa por
+  `normalizarImportacion`, así que crear e importar comparten validación.
 
 Solo hay una importación activa: `importar()` sustituye las rutinas y la pantalla
 de lista solo ofrece eliminarlas, no añadir más.
