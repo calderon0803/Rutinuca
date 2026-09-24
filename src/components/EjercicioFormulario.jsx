@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { Minus, Plus, X } from 'lucide-react'
 import { ZONAS } from '../data/grupos'
+import { aEjercicio, ejercicioVacio } from '../lib/borradores'
 import { esObjetivoValido } from '../lib/rutinas'
-
-const SERIES_POR_DEFECTO = 3
 
 // Como se hace el ejercicio: es una eleccion, no una suma de casillas.
 const TIPOS = [
@@ -14,22 +14,6 @@ const TIPOS = [
     pista: 'Encadenado con otro ejercicio, sin descanso entre ellos.',
   },
 ]
-
-function ejercicioVacio() {
-  return {
-    ejercicio: '',
-    grupo: '',
-    indicaciones: '',
-    series: Array.from({ length: SERIES_POR_DEFECTO }, () => ''),
-    tipo: 'normal',
-    pareja: {
-      ejercicio: '',
-      grupo: '',
-      indicaciones: '',
-      series: Array.from({ length: SERIES_POR_DEFECTO }, () => ''),
-    },
-  }
-}
 
 /** Deja el array de objetivos con `largo` posiciones, repitiendo la ultima. */
 function ajustarLargo(series, largo) {
@@ -52,29 +36,6 @@ function revisar(borrador) {
     }
   }
   return fallos
-}
-
-/** Pasa el borrador al formato del fichero de rutinas. */
-function aEjercicio(borrador) {
-  const salida = {
-    ejercicio: borrador.ejercicio.trim(),
-    grupo: borrador.grupo,
-    series: borrador.series.map((s) => s.trim()),
-    topset: borrador.tipo === 'topset',
-  }
-  if (borrador.indicaciones.trim()) salida.indicaciones = borrador.indicaciones.trim()
-
-  if (borrador.tipo === 'superserie') {
-    salida.superserie_ejercicio = {
-      ejercicio: borrador.pareja.ejercicio.trim(),
-      grupo: borrador.pareja.grupo,
-      series: borrador.pareja.series.map((s) => s.trim()),
-    }
-    if (borrador.pareja.indicaciones.trim()) {
-      salida.superserie_ejercicio.indicaciones = borrador.pareja.indicaciones.trim()
-    }
-  }
-  return salida
 }
 
 /** Opciones del desplegable, agrupadas por zona del cuerpo. */
@@ -127,7 +88,7 @@ function CamposSeries({ series, onCambiar, error, etiqueta }) {
               disabled={series.length === 1}
               aria-label={`Quitar la serie ${i + 1}`}
             >
-              −
+              <Minus size={16} aria-hidden="true" />
             </button>
           </li>
         ))}
@@ -135,10 +96,11 @@ function CamposSeries({ series, onCambiar, error, etiqueta }) {
 
       <button
         type="button"
-        className="boton boton--fantasma boton--pequeno"
+        className="boton boton--terciario boton--pequeno"
         onClick={() => onCambiar([...series, series[series.length - 1] ?? ''])}
       >
-        + Añadir serie
+        <Plus size={15} aria-hidden="true" />
+        Añadir serie
       </button>
 
       {error && <p className="formulario__error">{error}</p>}
@@ -197,7 +159,7 @@ export default function EjercicioFormulario({ inicial, onGuardar, onCerrar }) {
         <div className="modal__barra">
           <h2 className="modal__titulo">{inicial ? 'Editar ejercicio' : 'Nuevo ejercicio'}</h2>
           <button type="button" className="boton-cerrar" onClick={onCerrar} aria-label="Cerrar">
-            ×
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 

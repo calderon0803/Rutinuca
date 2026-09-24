@@ -1,9 +1,15 @@
 @use 'variables' as v;
 
+// Todas las acciones son botones; lo que cambia es el tamano y el peso visual,
+// segun lo importantes que sean. Tres niveles: --grande (la principal de la
+// pantalla, una sola), el normal (alternativas) y --terciario (lo accesorio).
 .boton {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 1.25rem;
   border: 1px solid transparent;
   border-radius: v.$radio;
   background: v.$color-base-20;
@@ -12,7 +18,8 @@
   cursor: pointer;
   transition:
     transform 0.06s ease,
-    background 0.15s ease;
+    background 0.15s ease,
+    border-color 0.15s ease;
 
   &:active {
     transform: scale(0.985);
@@ -21,6 +28,12 @@
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+  }
+
+  // Nivel 1: la accion principal de cada pantalla, y solo esa.
+  &--grande {
+    padding: 1.15rem 1.25rem;
+    font-size: 1.0625rem;
   }
 
   &--primario {
@@ -32,6 +45,46 @@
     }
   }
 
+  // Nivel 2: alternativas de peso.
+  &--secundario {
+    background: v.$color-base-20;
+    border-color: v.$color-base-30;
+
+    &:hover:not(:disabled) {
+      background: v.$color-base-30;
+    }
+  }
+
+  // Nivel 3: sigue siendo un boton, pero mas bajo y con menos contraste.
+  &--terciario {
+    padding: 0.625rem 1rem;
+    border-color: v.$color-base-30;
+    background: v.$color-base-10;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      background: v.$color-base-20;
+      border-color: v.$color-base-40;
+    }
+  }
+
+  // Disparar algo destructivo: mismo tamano que el nivel 3, pero avisando.
+  &--peligroso {
+    padding: 0.625rem 1rem;
+    border-color: rgba(v.$color-danger, 0.45);
+    background: rgba(v.$color-danger, 0.1);
+    color: v.$color-danger;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      border-color: v.$color-danger;
+      background: rgba(v.$color-danger, 0.2);
+    }
+  }
+
+  // Confirmar algo destructivo, solo dentro de su dialogo.
   &--peligro {
     background: v.$color-danger;
     color: v.$color-primary-contrast;
@@ -41,30 +94,11 @@
     }
   }
 
-  &--secundario {
-    background: v.$color-base-20;
-    border-color: v.$color-base-30;
-
-    &:hover {
-      background: v.$color-base-30;
-    }
-  }
-
-  &--fantasma {
-    padding: 0.625rem;
-    background: none;
-    color: v.$color-base-60;
-    font-weight: 500;
-
-    &:hover {
-      color: v.$color-base-90;
-    }
-  }
-
+  // Accesorio dentro de un bloque: se cine a su texto.
   &--pequeno {
     width: auto;
-    align-self: flex-start;
-    padding: 0.5rem;
+    align-self: center;
+    padding: 0.4375rem 0.75rem;
     font-size: 0.85rem;
   }
 }

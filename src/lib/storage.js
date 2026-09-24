@@ -9,7 +9,8 @@ const CLAVE_SEPARADAS = 'rutinuca:separadas'
 const MAX_SESIONES = 20
 
 // Subela cuando cambie la forma de una rutina normalizada: lo guardado se descarta.
-const VERSION_DATOS = 1
+// v2: cada ejercicio tiene id propio y lo anotado cuelga de el, no de su posicion.
+const VERSION_DATOS = 2
 
 function leer(clave, porDefecto) {
   try {
@@ -59,8 +60,8 @@ export const guardarRutinas = (rutinas) =>
 export const cargarRegistros = () => leer(CLAVE_REGISTROS, {})
 export const guardarRegistros = (registros) => escribir(CLAVE_REGISTROS, registros)
 
-export function claveEjercicio(indice, nombre, esSuperserie = false) {
-  return `${indice}:${nombre}${esSuperserie ? ':ss' : ''}`
+export function claveEjercicio(ejercicio, esSuperserie = false) {
+  return `${ejercicio.id}${esSuperserie ? ':ss' : ''}`
 }
 
 export function serieRegistrada(registros, rutinaId, clave, indiceSerie) {
@@ -94,16 +95,16 @@ export function replicarPeso(registros, rutinaId, clave, numeroSeries) {
 }
 
 /** Cuantas series de un ejercicio (incluida su superserie) estan marcadas como hechas. */
-export function seriesHechas(registros, rutinaId, indice, ejercicio) {
+export function seriesHechas(registros, rutinaId, ejercicio) {
   const cuenta = (clave, total) => {
     const datos = registros?.[rutinaId]?.[clave] ?? {}
     let n = 0
     for (let i = 0; i < total; i += 1) if (datos[i]?.hecha) n += 1
     return n
   }
-  let hechas = cuenta(claveEjercicio(indice, ejercicio.ejercicio), ejercicio.series)
+  let hechas = cuenta(claveEjercicio(ejercicio), ejercicio.series)
   const ss = ejercicio.superserie_ejercicio
-  if (ss) hechas += cuenta(claveEjercicio(indice, ss.ejercicio, true), ss.series)
+  if (ss) hechas += cuenta(claveEjercicio(ss, true), ss.series)
   return hechas
 }
 
@@ -175,15 +176,9 @@ export function alternarSeparada(separadas, rutinaId, clave) {
   return { ...separadas, [rutinaId]: deRutina }
 }
 
-export function limpiarSeparadas(separadas, rutinaId) {
-  const copia = { ...separadas }
-  delete copia[rutinaId]
-  return copia
-}
-
-/** Borra el registro de una rutina completa (para empezar la sesion de cero). */
-export function limpiarRutina(registros, rutinaId) {
-  const copia = { ...registros }
+/** Quita de un mapa por rutina todo lo de una rutina (registro, historial...). */
+export function limpiarRutina(mapa, rutinaId) {
+  const copia = { ...mapa }
   delete copia[rutinaId]
   return copia
 }

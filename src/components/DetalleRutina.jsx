@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { ChevronLeft, CircleCheckBig, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import Etiquetas from './Etiquetas'
 import Leyenda from './Leyenda'
 import { plural, resumenSeries, totalSeries } from '../lib/rutinas'
 import { claveEjercicio, estaSeparada, seriesHechas, ultimaSesion } from '../lib/storage'
 import { formatearFecha } from '../lib/fechas'
+import { useGestoAtras } from '../lib/gestoAtras'
 
 /** Lista de ejercicios de una rutina; cada uno abre su modal. */
 export default function DetalleRutina({
@@ -16,15 +18,19 @@ export default function DetalleRutina({
   onFinalizar,
   puedeFinalizar,
   onReiniciar,
+  onEditar,
+  onEliminarRutina,
 }) {
   const ultima = ultimaSesion(historial, rutina.id)
   const [verLeyenda, setVerLeyenda] = useState(false)
+  useGestoAtras(verLeyenda, () => setVerLeyenda(false))
 
   return (
     <div className="pantalla">
       <header className="cabecera cabecera--con-volver">
         <button type="button" className="boton-volver" onClick={onVolver}>
-          <span aria-hidden="true">‹</span> Rutinas
+          <ChevronLeft size={16} aria-hidden="true" />
+          Rutinas
         </button>
         <h1 className="cabecera__titulo">{rutina.rutina}</h1>
         <p className="cabecera__sub">
@@ -35,16 +41,12 @@ export default function DetalleRutina({
 
       <ul className="lista">
         {rutina.ejercicios.map((ejercicio, indice) => {
-          const hechas = seriesHechas(registros, rutina.id, indice, ejercicio)
-          const separada = estaSeparada(
-            separadas,
-            rutina.id,
-            claveEjercicio(indice, ejercicio.ejercicio),
-          )
+          const hechas = seriesHechas(registros, rutina.id, ejercicio)
+          const separada = estaSeparada(separadas, rutina.id, claveEjercicio(ejercicio))
           const total = totalSeries(ejercicio)
           const completo = hechas === total
           return (
-            <li key={`${indice}-${ejercicio.ejercicio}`}>
+            <li key={ejercicio.id}>
               <button
                 type="button"
                 className={`tarjeta tarjeta--ejercicio${completo ? ' tarjeta--completa' : ''}`}
@@ -74,7 +76,7 @@ export default function DetalleRutina({
 
       <button
         type="button"
-        className="boton boton--fantasma boton--pequeno leyenda__enlace"
+        className="boton boton--terciario boton--pequeno leyenda__enlace"
         onClick={() => setVerLeyenda(true)}
       >
         ¿Qué significan las etiquetas?
@@ -83,15 +85,27 @@ export default function DetalleRutina({
       <footer className="pie">
         <button
           type="button"
-          className="boton boton--primario"
+          className="boton boton--primario boton--grande"
           onClick={onFinalizar}
           disabled={!puedeFinalizar}
         >
+          <CircleCheckBig size={20} aria-hidden="true" />
           Finalizar entrenamiento
         </button>
-        <button type="button" className="boton boton--fantasma" onClick={onReiniciar}>
-          Reiniciar registro de esta rutina
-        </button>
+        <div className="acciones">
+          <button type="button" className="boton boton--terciario" onClick={onEditar}>
+            <Pencil size={16} aria-hidden="true" />
+            Editar
+          </button>
+          <button type="button" className="boton boton--terciario" onClick={onReiniciar}>
+            <RotateCcw size={16} aria-hidden="true" />
+            Reiniciar
+          </button>
+          <button type="button" className="boton boton--peligroso" onClick={onEliminarRutina}>
+            <Trash2 size={16} aria-hidden="true" />
+            Eliminar
+          </button>
+        </div>
       </footer>
 
       {verLeyenda && <Leyenda onCerrar={() => setVerLeyenda(false)} />}

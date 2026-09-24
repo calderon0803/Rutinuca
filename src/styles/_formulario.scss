@@ -140,6 +140,35 @@
   }
 }
 
+// Flechas para cambiar un ejercicio de posicion dentro de la rutina.
+.orden {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &__boton {
+    width: 1.75rem;
+    height: 1.5rem;
+    border: 1px solid v.$color-base-30;
+    border-radius: v.$radio-campo;
+    background: none;
+    color: v.$color-base-60;
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: v.$color-primary;
+      color: v.$color-primary;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+}
+
 // Quitar una serie o un ejercicio: se ve que borra sin necesidad de probarlo.
 .boton-quitar {
   flex-shrink: 0;

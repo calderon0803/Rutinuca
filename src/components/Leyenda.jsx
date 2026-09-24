@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { X } from 'lucide-react'
 
 const ETIQUETAS = [
   {
@@ -55,7 +56,7 @@ export default function Leyenda({ onCerrar }) {
             onClick={onCerrar}
             aria-label="Cerrar"
           >
-            ×
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef } from 'react'
+import { X } from 'lucide-react'
 import { formatearObjetivo } from '../lib/rutinas'
 import { claveEjercicio, estaSeparada, referenciaAnterior, serieRegistrada } from '../lib/storage'
 import { resumenSerie } from '../lib/fechas'
@@ -105,7 +106,7 @@ function BloqueSeries({
       {ejercicio.series > 1 && (
         <button
           type="button"
-          className="boton boton--fantasma boton--pequeno"
+          className="boton boton--terciario boton--pequeno"
           onClick={() => onReplicar(clave, ejercicio.series)}
         >
           Repetir el peso de la serie 1 en las demás
@@ -118,7 +119,6 @@ function BloqueSeries({
 /** Modal con el detalle del ejercicio: indicaciones y registro de cada serie. */
 export default function EjercicioModal({
   rutinaId,
-  indice,
   ejercicio,
   registros,
   historial,
@@ -144,7 +144,7 @@ export default function EjercicioModal({
   }, [onCerrar])
 
   const pareja = ejercicio.superserie_ejercicio
-  const clave = claveEjercicio(indice, ejercicio.ejercicio)
+  const clave = claveEjercicio(ejercicio)
   const separada = estaSeparada(separadas, rutinaId, clave)
 
   return (
@@ -165,7 +165,7 @@ export default function EjercicioModal({
             onClick={onCerrar}
             aria-label="Cerrar"
           >
-            ×
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -185,7 +185,7 @@ export default function EjercicioModal({
               esPareja
               separada={separada}
               ejercicio={pareja}
-              clave={claveEjercicio(indice, pareja.ejercicio, true)}
+              clave={claveEjercicio(pareja, true)}
               rutinaId={rutinaId}
               registros={registros}
               historial={historial}
@@ -198,7 +198,7 @@ export default function EjercicioModal({
             <div className="separacion">
               <button
                 type="button"
-                className="boton boton--fantasma boton--pequeno"
+                className="boton boton--terciario boton--pequeno"
                 onClick={() => onSeparar(clave)}
               >
                 {separada ? 'Volver a encadenarlos' : 'Hoy no puedo encadenarlos'}

@@ -1,20 +1,26 @@
+import { useState } from 'react'
+import { ChevronRight, Plus, Share2, Trash2 } from 'lucide-react'
 import Logo from './Logo'
+import ExportarRutinas from './ExportarRutinas'
 import { seriesHechas } from '../lib/storage'
-import { aFormatoExportable, plural, totalSeries, zonasDeRutina } from '../lib/rutinas'
-import { descargarJson } from '../lib/descargas'
+import { plural, totalSeries, zonasDeRutina } from '../lib/rutinas'
+import { useGestoAtras } from '../lib/gestoAtras'
 
 function progresoRutina(registros, rutina) {
   let hechas = 0
   let total = 0
-  rutina.ejercicios.forEach((ej, i) => {
-    hechas += seriesHechas(registros, rutina.id, i, ej)
+  rutina.ejercicios.forEach((ej) => {
+    hechas += seriesHechas(registros, rutina.id, ej)
     total += totalSeries(ej)
   })
   return { hechas, total }
 }
 
 /** Un boton por rutina importada. */
-export default function ListaRutinas({ rutinas, registros, onAbrir, onEliminar }) {
+export default function ListaRutinas({ rutinas, registros, onAbrir, onNueva, onEliminarTodo }) {
+  const [exportando, setExportando] = useState(false)
+  useGestoAtras(exportando, () => setExportando(false))
+
   return (
     <div className="pantalla">
       <header className="cabecera cabecera--marca">
@@ -50,27 +56,40 @@ export default function ListaRutinas({ rutinas, registros, onAbrir, onEliminar }
                     </span>
                   )}
                 </span>
-                <span className="tarjeta__flecha" aria-hidden="true">
-                  ›
-                </span>
+                <ChevronRight className="tarjeta__flecha" size={22} aria-hidden="true" />
               </button>
             </li>
           )
         })}
       </ul>
 
-      <footer className="pie pie--compacto">
+      <footer className="pie">
         <button
           type="button"
-          className="boton boton--fantasma"
-          onClick={() => descargarJson('rutinuca-rutinas.json', aFormatoExportable(rutinas))}
+          className="boton boton--primario boton--grande boton--anadir"
+          onClick={onNueva}
         >
-          Exportar rutina
+          <Plus size={20} aria-hidden="true" />
+          Nueva rutina
         </button>
-        <button type="button" className="boton boton--fantasma" onClick={onEliminar}>
-          Eliminar rutina
-        </button>
+
+        <div className="acciones">
+          <button
+            type="button"
+            className="boton boton--terciario"
+            onClick={() => setExportando(true)}
+          >
+            <Share2 size={16} aria-hidden="true" />
+            Exportar
+          </button>
+          <button type="button" className="boton boton--peligroso" onClick={onEliminarTodo}>
+            <Trash2 size={16} aria-hidden="true" />
+            {rutinas.length === 1 ? 'Eliminar' : 'Eliminar todo'}
+          </button>
+        </div>
       </footer>
+
+      {exportando && <ExportarRutinas rutinas={rutinas} onCerrar={() => setExportando(false)} />}
     </div>
   )
 }

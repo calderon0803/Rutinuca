@@ -7,6 +7,7 @@ import { GRUPOS_MUSCULARES, ZONAS, zonaDe } from '../data/grupos'
 const CLAVES_FICHERO = ['rutinas']
 const CLAVES_RUTINA = ['rutina', 'ejercicios']
 const CLAVES_EJERCICIO = [
+  'id',
   'ejercicio',
   'grupo',
   'indicaciones',
@@ -16,7 +17,7 @@ const CLAVES_EJERCICIO = [
   'superserie_ejercicio',
 ]
 // La pareja de una superserie no lleva distintivos ni anida otra superserie.
-const CLAVES_PAREJA = ['ejercicio', 'grupo', 'indicaciones', 'series']
+const CLAVES_PAREJA = ['id', 'ejercicio', 'grupo', 'indicaciones', 'series']
 
 /** Convierte un texto en un identificador estable y legible. */
 export function slug(texto) {
@@ -31,6 +32,14 @@ export function slug(texto) {
 }
 
 class ErrorRutina extends Error {}
+
+/**
+ * Id de un ejercicio. Lo que se anota cuelga de el, no de su nombre ni de su
+ * posicion, para que renombrar o reordenar no pierda el registro ni el historial.
+ */
+export function nuevoIdEjercicio() {
+  return 'e' + crypto.randomUUID().replaceAll('-', '').slice(0, 10)
+}
 
 function aEntero(valor, porDefecto) {
   const n = Number(valor)
@@ -149,6 +158,7 @@ function normalizarEjercicio(bruto, ruta, { permitirSuperserie }) {
   }
 
   const ejercicio = {
+    id: leerTexto(bruto, 'id', ruta) || nuevoIdEjercicio(),
     ejercicio: nombre,
     grupo,
     indicaciones: leerTexto(bruto, 'indicaciones', ruta),
@@ -202,12 +212,19 @@ function normalizarRutina(bruto, indice) {
     throw new ErrorRutina(`"${nombre}": falta el array de ejercicios.`)
   }
 
+  const ejercicios = listaBruta.map((ej, i) =>
+    normalizarEjercicio(ej, `"${nombre}" > ejercicio ${i + 1}`, { permitirSuperserie: true }),
+  )
+
+  const ids = ejercicios.flatMap((e) => [e.id, e.superserie_ejercicio?.id].filter(Boolean))
+  const repetido = ids.find((id, i) => ids.indexOf(id) !== i)
+  if (repetido)
+    throw new ErrorRutina(`"${nombre}": el id de ejercicio "${repetido}" esta repetido.`)
+
   return {
     id: `${slug(nombre)}--${indice}`,
     rutina: nombre,
-    ejercicios: listaBruta.map((ej, i) =>
-      normalizarEjercicio(ej, `"${nombre}" > ejercicio ${i + 1}`, { permitirSuperserie: true }),
-    ),
+    ejercicios,
   }
 }
 
@@ -245,7 +262,7 @@ export async function leerFicheroRutinas(fichero) {
 }
 
 function ejercicioExportable(ejercicio, esPareja) {
-  const salida = { ejercicio: ejercicio.ejercicio }
+  const salida = { id: ejercicio.id, ejercicio: ejercicio.ejercicio }
   if (ejercicio.grupo) salida.grupo = ejercicio.grupo
   if (ejercicio.indicaciones) salida.indicaciones = ejercicio.indicaciones
   const objetivos = ejercicio.repeticiones_por_serie.map(formatearObjetivo)
@@ -271,6 +288,20 @@ export function aFormatoExportable(rutinas) {
       ejercicios: ejercicios.map((ejercicio) => ejercicioExportable(ejercicio, false)),
     })),
   }
+}
+
+/**
+ * Devuelve la rutina con un id que no choque con las existentes. El id es la
+ * clave del registro y del historial, asi que nunca se reutiliza.
+ */
+export function conIdLibre(rutina, existentes) {
+  const usados = new Set(existentes.map((r) => r.id))
+  if (!usados.has(rutina.id)) return rutina
+
+  const base = rutina.id.replace(/--\d+$/, '')
+  let n = 1
+  while (usados.has(`${base}--${n}`)) n += 1
+  return { ...rutina, id: `${base}--${n}` }
 }
 
 /** Zonas del cuerpo que toca una rutina, en el orden de la lista de grupos. */

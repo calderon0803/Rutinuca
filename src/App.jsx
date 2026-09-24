@@ -4,7 +4,9 @@ import ListaRutinas from './components/ListaRutinas'
 import DetalleRutina from './components/DetalleRutina'
 import EjercicioModal from './components/EjercicioModal'
 import Confirmacion from './components/Confirmacion'
-import CrearRutina from './components/CrearRutina'
+import EditorRutina from './components/EditorRutina'
+import { conIdLibre } from './lib/rutinas'
+import { useGestoAtras } from './lib/gestoAtras'
 import {
   actualizarSerie,
   alternarSeparada,
@@ -19,7 +21,6 @@ import {
   guardarSeparadas,
   hayAlgoAnotado,
   limpiarRutina,
-  limpiarSeparadas,
   replicarPeso,
 } from './lib/storage'
 
@@ -31,7 +32,8 @@ export default function App() {
   const [rutinaId, setRutinaId] = useState(null)
   const [ejercicioAbierto, setEjercicioAbierto] = useState(null)
   const [confirmacion, setConfirmacion] = useState(null)
-  const [creando, setCreando] = useState(false)
+  // null = cerrado | { id: null } = rutina nueva | { id } = editando esa rutina
+  const [editor, setEditor] = useState(null)
 
   useEffect(() => {
     guardarRutinas(rutinas)
@@ -50,6 +52,12 @@ export default function App() {
   }, [separadas])
 
   const rutinaActiva = rutinas.find((r) => r.id === rutinaId) ?? null
+
+  // Volver atras cierra la capa de arriba en vez de salirse de la app.
+  useGestoAtras(Boolean(rutinaActiva), () => setRutinaId(null))
+  useGestoAtras(Boolean(editor), () => setEditor(null))
+  useGestoAtras(ejercicioAbierto !== null, () => setEjercicioAbierto(null))
+  useGestoAtras(Boolean(confirmacion), () => setConfirmacion(null))
 
   const cambiarSerie = useCallback(
     (clave, indiceSerie, campo, valor) => {
@@ -80,20 +88,49 @@ export default function App() {
     setRutinas(nuevas)
   }
 
-  function crearRutina(nuevas) {
-    setRutinas(nuevas)
-    setCreando(false)
+  /**
+   * Crear anade una rutina a las que ya hay; editar sustituye la suya conservando
+   * su id, que es la clave de su registro y su historial. Importar un fichero
+   * sigue reemplazando todas.
+   */
+  function guardarRutina([nueva]) {
+    setRutinas((previas) =>
+      editor.id
+        ? previas.map((rutina) => (rutina.id === editor.id ? { ...nueva, id: editor.id } : rutina))
+        : [...previas, conIdLibre(nueva, previas)],
+    )
+    setEditor(null)
+  }
+
+  function eliminarRutina(id) {
+    const rutina = rutinas.find((r) => r.id === id)
+    setConfirmacion({
+      mensaje: `Se eliminará "${rutina.rutina}" y su historial.`,
+      textoAccion: 'Eliminar',
+      peligro: true,
+      alAceptar: () => {
+        setRutinas((previas) => previas.filter((r) => r.id !== id))
+        setRegistros((previos) => limpiarRutina(previos, id))
+        setSeparadas((previas) => limpiarRutina(previas, id))
+        setHistorial((previo) => limpiarRutina(previo, id))
+        setRutinaId(null)
+      },
+    })
   }
 
   function eliminarImportacion() {
     setConfirmacion({
-      mensaje: 'Se eliminará la rutina y todo el registro de series.',
+      mensaje:
+        rutinas.length === 1
+          ? 'Se eliminará la rutina, con su registro y su historial.'
+          : `Se eliminarán las ${rutinas.length} rutinas, con su registro y su historial.`,
       textoAccion: 'Eliminar',
       peligro: true,
       alAceptar: () => {
         setRutinas([])
         setRegistros({})
         setSeparadas({})
+        setHistorial({})
         setRutinaId(null)
       },
     })
@@ -108,7 +145,7 @@ export default function App() {
         const cerrada = cerrarSesion(registros, historial, rutinaId)
         setRegistros(cerrada.registros)
         setHistorial(cerrada.historial)
-        setSeparadas((previas) => limpiarSeparadas(previas, rutinaId))
+        setSeparadas((previas) => limpiarRutina(previas, rutinaId))
         setRutinaId(null)
       },
     })
@@ -121,23 +158,30 @@ export default function App() {
       peligro: true,
       alAceptar: () => {
         setRegistros((previos) => limpiarRutina(previos, rutinaId))
-        setSeparadas((previas) => limpiarSeparadas(previas, rutinaId))
+        setSeparadas((previas) => limpiarRutina(previas, rutinaId))
       },
     })
   }
 
   let pantalla
-  if (creando) {
-    pantalla = <CrearRutina onCrear={crearRutina} onCancelar={() => setCreando(false)} />
+  if (editor) {
+    pantalla = (
+      <EditorRutina
+        rutina={editor.id ? rutinas.find((r) => r.id === editor.id) : null}
+        onGuardar={guardarRutina}
+        onCancelar={() => setEditor(null)}
+      />
+    )
   } else if (rutinas.length === 0) {
-    pantalla = <Inicio onImportar={importar} onCrear={() => setCreando(true)} />
+    pantalla = <Inicio onImportar={importar} onCrear={() => setEditor({ id: null })} />
   } else if (!rutinaActiva) {
     pantalla = (
       <ListaRutinas
         rutinas={rutinas}
         registros={registros}
         onAbrir={setRutinaId}
-        onEliminar={eliminarImportacion}
+        onNueva={() => setEditor({ id: null })}
+        onEliminarTodo={eliminarImportacion}
       />
     )
   } else {
@@ -151,13 +195,14 @@ export default function App() {
           onVolver={() => setRutinaId(null)}
           onAbrirEjercicio={setEjercicioAbierto}
           onFinalizar={finalizarEntrenamiento}
+          onEditar={() => setEditor({ id: rutinaActiva.id })}
+          onEliminarRutina={() => eliminarRutina(rutinaActiva.id)}
           puedeFinalizar={hayAlgoAnotado(registros, rutinaActiva.id)}
           onReiniciar={reiniciarRegistro}
         />
         {ejercicioAbierto != null && rutinaActiva.ejercicios[ejercicioAbierto] && (
           <EjercicioModal
             rutinaId={rutinaActiva.id}
-            indice={ejercicioAbierto}
             ejercicio={rutinaActiva.ejercicios[ejercicioAbierto]}
             registros={registros}
             historial={historial}

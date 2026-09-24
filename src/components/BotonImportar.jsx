@@ -1,8 +1,9 @@
 import { useId, useRef, useState } from 'react'
+import { Upload } from 'lucide-react'
 import { leerFicheroRutinas } from '../lib/rutinas'
 
 /** Boton que abre el selector de ficheros y devuelve las rutinas ya normalizadas. */
-export default function BotonImportar({ onImportar, variante = 'primario', children }) {
+export default function BotonImportar({ onImportar, variante = 'primario', extra = '', children }) {
   const inputRef = useRef(null)
   const [error, setError] = useState('')
   const idError = useId()
@@ -23,10 +24,11 @@ export default function BotonImportar({ onImportar, variante = 'primario', child
     <div className="importador">
       <button
         type="button"
-        className={`boton boton--${variante}`}
+        className={`boton boton--${variante}${extra ? ` ${extra}` : ''}`}
         onClick={() => inputRef.current?.click()}
         aria-describedby={error ? idError : undefined}
       >
+        <Upload size={18} aria-hidden="true" />
         {children}
       </button>
       <input

@@ -30,6 +30,9 @@ service worker, y los datos ya viven en `localStorage`.
   publicar una versión nueva, se instala en segundo plano y entra al recargar.
 - El service worker **solo funciona en el build de producción** (`npm run build`
   + `npm run preview`), no en `npm run dev`.
+- Instalada no hay barra del navegador, así que el **gesto de volver atrás** es
+  la única forma de retroceder: cierra el modal o la pantalla en la que estés, y
+  solo sale de la app cuando ya estás en la lista de rutinas.
 
 ## Cómo se usa
 
@@ -58,9 +61,31 @@ importar igual que cualquier otra.
    la rutina a cero. La próxima vez, cada serie muestra debajo lo que hiciste la
    última vez (`Anterior: 10 reps · 42,5 kg`).
 
-Solo hay una importación activa a la vez. Para cargar otro JSON, pulsa
-**Eliminar rutina** en la pantalla de rutinas y vuelve a importar: eso
-borra también el registro de series.
+Las rutinas creadas en la app se van **añadiendo**: desde la lista, con
+**+ Nueva rutina**, puedes tener tantas como quieras. Desde la pantalla de una
+rutina, **Editar rutina** la reabre en el editor para renombrarla o cambiar sus
+ejercicios, y **Eliminar esta rutina** la borra solo a ella.
+
+En el editor, las flechas de cada tarjeta **cambian el ejercicio de posición**.
+
+Editar conserva los identificadores, así que **no pierdes el historial ni el
+entrenamiento en curso**: puedes renombrar un ejercicio o moverlo de sitio y lo
+anotado sigue siendo suyo. Se puede editar cualquier rutina, la hayas creado en
+la app o importado de un fichero.
+
+**Exportar** abre un diálogo donde eliges qué rutinas te llevas —vienen todas
+marcadas—. Si eliges una, el fichero toma su nombre
+(`rutinuca-dia-1-empuje.json`); si son varias, sale un `rutinuca-rutinas.json`.
+
+En el móvil el botón principal es **Compartir**: abre el menú del sistema, así
+que la rutina se manda por WhatsApp, Telegram o correo como fichero adjunto, sin
+pasar por la carpeta de descargas. Debajo queda *Descargar fichero* por si lo
+prefieres. En un navegador de escritorio, que normalmente no sabe compartir
+ficheros, solo aparece **Descargar**.
+
+Importar un fichero es distinto: **sustituye** todas las rutinas, porque un JSON
+es el conjunto entero. Si tienes rutinas creadas a mano y quieres conservarlas,
+expórtalas antes.
 
 ## Formato del JSON
 
@@ -95,6 +120,7 @@ una rutina suelta.
 | --- | --- | --- |
 | `rutina` | sí | Nombre de la rutina, es el texto del botón. |
 | `ejercicios` | sí | Array con al menos un ejercicio. |
+| `id` | no | Identificador del ejercicio. Si no lo pones se genera solo; lo anotado y el historial cuelgan de él, así que **conservarlo al exportar mantiene enganchado el historial**. Único dentro de la rutina. |
 | `ejercicio` | sí | Nombre del ejercicio. |
 | `grupo` | no | Grupo muscular, de la lista cerrada de [`src/data/grupos.js`](src/data/grupos.js). Está organizada por zonas (Espalda, Brazo, Pierna, Core…) solo para agruparla en el desplegable: el valor que se guarda es siempre un grupo concreto, como `"Gemelo"`. |
 | `indicaciones` | no | Texto libre que se muestra en el modal. |
@@ -151,7 +177,8 @@ src/
   styles/       Tokens SCSS y parciales
 ```
 
-Los datos guardados viven en cuatro claves: `rutinuca:rutinas` (las rutinas
+Lo anotado cuelga del **id de cada ejercicio**, no de su nombre ni de su
+posición. Los datos guardados viven en cuatro claves: `rutinuca:rutinas` (las rutinas
 importadas), `rutinuca:registros` (el entrenamiento en curso),
 `rutinuca:separadas` (las superseries que hoy van sueltas) y
 `rutinuca:historial` (las sesiones cerradas, hasta 20 por rutina). Las
