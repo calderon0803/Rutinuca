@@ -97,6 +97,13 @@ App instalable con `vite-plugin-pwa` (modo `generateSW`). El manifiesto se
 declara en `vite.config.js` y los iconos PNG viven en `public/icons/`. El
 service worker solo existe en el build de producción.
 
+`registerType: 'prompt'`: el service worker nuevo se queda esperando y
+`AvisoActualizacion` (con el hook `src/lib/actualizacion.js`) enseña la barra de
+«hay una versión nueva». Con `autoUpdate` la app se recargaba sola y no había
+forma de avisar. Las pantallas reservan `env(safe-area-inset-top)` además del
+inferior, porque instalada en un iPhone con isla dinámica el contenido sube
+hasta debajo de la barra de estado.
+
 ## Comandos
 
 - `npm run dev` — servidor de desarrollo (puerto 5173).

@@ -5,6 +5,7 @@ import DetalleRutina from './components/DetalleRutina'
 import EjercicioModal from './components/EjercicioModal'
 import Confirmacion from './components/Confirmacion'
 import EditorRutina from './components/EditorRutina'
+import AvisoActualizacion from './components/AvisoActualizacion'
 import { conIdLibre } from './lib/rutinas'
 import { useGestoAtras } from './lib/gestoAtras'
 import {
@@ -220,6 +221,7 @@ export default function App() {
   return (
     <>
       {pantalla}
+      <AvisoActualizacion />
       {confirmacion && (
         <Confirmacion
           mensaje={confirmacion.mensaje}

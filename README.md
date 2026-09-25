@@ -26,8 +26,10 @@ service worker, y los datos ya viven en `localStorage`.
 
 - Manifiesto e iconos: `vite-plugin-pwa` genera `manifest.webmanifest` a partir
   de la configuración de `vite.config.js`; los iconos están en `public/icons/`.
-- El service worker se actualiza solo (`registerType: 'autoUpdate'`): al
-  publicar una versión nueva, se instala en segundo plano y entra al recargar.
+- Cuando hay una versión nueva **aparece un aviso abajo** con un botón para
+  actualizar (`registerType: 'prompt'`). El service worker nuevo espera a que lo
+  confirmes, para no cambiarte la app a mitad de un entrenamiento. Se comprueba
+  al abrir la app, cada media hora, y al volver a ella desde segundo plano.
 - El service worker **solo funciona en el build de producción** (`npm run build`
   + `npm run preview`), no en `npm run dev`.
 - Instalada no hay barra del navegador, así que el **gesto de volver atrás** es

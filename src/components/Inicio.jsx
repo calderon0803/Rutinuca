@@ -34,7 +34,7 @@ export default function Inicio({ onImportar, onCrear }) {
           </button>
           <button type="button" className="boton boton--terciario" onClick={descargarPlantilla}>
             <Download size={16} aria-hidden="true" />
-            Descargar
+            Plantilla
           </button>
         </div>
       </div>

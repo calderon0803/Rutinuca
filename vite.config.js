@@ -6,8 +6,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // El service worker se actualiza solo: la app es pequena y no hay datos en servidor.
-      registerType: 'autoUpdate',
+      // El service worker nuevo espera a que se confirme desde el aviso, para no
+      // cambiar la app a mitad de un entrenamiento.
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Rutinuca',

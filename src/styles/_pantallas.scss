@@ -9,7 +9,7 @@
   min-height: 100dvh;
   max-width: v.$ancho-inicio;
   margin: 0 auto;
-  padding: 2rem 1.25rem calc(2rem + env(safe-area-inset-bottom));
+  padding: calc(2rem + env(safe-area-inset-top)) 1.25rem calc(2rem + env(safe-area-inset-bottom));
 
   &__marca {
     text-align: center;
@@ -32,7 +32,7 @@
 .pantalla {
   max-width: v.$ancho-pantalla;
   margin: 0 auto;
-  padding: 1.5rem 1rem calc(2rem + env(safe-area-inset-bottom));
+  padding: calc(1.5rem + env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom));
 }
 
 .cabecera {
@@ -178,6 +178,31 @@
     flex: 1 1 0;
     width: auto;
     min-width: 0;
+  }
+}
+
+// Aviso de version nueva: por encima de todo, pero sin tapar el contenido.
+.aviso {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  left: 1rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: v.$ancho-pantalla;
+  margin: 0 auto;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid v.$color-base-30;
+  border-radius: v.$radio;
+  background: v.$color-base-20;
+  box-shadow: v.$box-shadow-modal;
+
+  &__texto {
+    font-size: 0.9rem;
+    font-weight: 500;
   }
 }
 
